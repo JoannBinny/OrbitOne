@@ -1,0 +1,5 @@
+strands-agents[anthropic,ollama,gemini,openai]
+strands-agents-tools
+boto3
+requests
+python-dotenv

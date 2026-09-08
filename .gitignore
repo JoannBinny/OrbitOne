@@ -1,0 +1,31 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+
+# Databases
+*.db
+*.sqlite3
+
+# Backend/agent logs
+*.log
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AWS
+.aws-sam/
