@@ -1,6 +1,12 @@
 import os
+import logging
 from dotenv import load_dotenv
 from strands import Agent
+
+# Suppress noisy but harmless warnings from the OpenAI-compatible model
+# client (e.g. reasoningContent stripping messages from reasoning models
+# like gpt-oss). These don't affect correctness, just console noise.
+logging.getLogger("strands.models.openai").setLevel(logging.ERROR)
 
 from prompts import SYSTEM_PROMPT
 from tools import (

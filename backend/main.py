@@ -44,8 +44,35 @@ def list_events(db: Session = Depends(get_db)):
     return db.query(models.Event).all()
 
 
+@app.get("/events/{event_id}", response_model=schemas.EventOut)
+def get_event(event_id: int, db: Session = Depends(get_db)):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+
 @app.post("/events", response_model=schemas.EventOut)
 def create_event(payload: schemas.EventCreate, db: Session = Depends(get_db)):
+    if payload.location_id:
+        conflicting = (
+            db.query(models.Booking)
+            .filter(
+                models.Booking.location_id == payload.location_id,
+                models.Booking.start_time < payload.end_time,
+                models.Booking.end_time > payload.start_time,
+            )
+            .first()
+        )
+        if conflicting:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"Location {payload.location_id} is already booked "
+                    f"for an overlapping time slot."
+                ),
+            )
+
     event = models.Event(
         organization_id=payload.organization_id,
         title=payload.title,
