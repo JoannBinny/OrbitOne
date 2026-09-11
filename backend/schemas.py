@@ -103,3 +103,31 @@ class AgentActionCreate(BaseModel):
     event_id: Optional[int] = None
     action: str
     details: Optional[str] = None
+
+
+class OrganizationOut(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class AgentRunCreate(BaseModel):
+    organization_id: int
+    message: str
+
+
+class AgentRunOut(BaseModel):
+    id: int
+    organization_id: int
+    message: str
+    status: str
+    result_text: Optional[str]
+    event_id: Optional[int]
+    error: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -1,0 +1,13 @@
+# OrbitOne — combined Python dependencies (backend + agent), same venv.
+#
+# backend/main.py imports agent/agent.py dynamically inside the async
+# /agent/run job (see .claude/skills/orbitone-frontend-build/SKILL.md), so a
+# single environment needs both sets of dependencies installed for that
+# endpoint to actually succeed instead of failing with "No module named
+# 'strands'". Install with:
+#
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+
+-r backend/requirements.txt
+-r agent/requirements.txt

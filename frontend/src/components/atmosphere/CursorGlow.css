@@ -1,0 +1,105 @@
+.cursor-glow__trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;
+  width: 64px;
+  height: 64px;
+  margin-top: -32px;
+  margin-left: -32px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.35), transparent 70%);
+  filter: blur(4px);
+  opacity: 0.7;
+  transition: width 220ms var(--ease-standard), height 220ms var(--ease-standard), margin 220ms var(--ease-standard);
+}
+
+.cursor-glow__trail[data-interactive="true"] {
+  width: 88px;
+  height: 88px;
+  margin-top: -44px;
+  margin-left: -44px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.5), transparent 70%);
+}
+
+/* Semantic modes — reflect real global ambient state, see CursorGlow.tsx */
+.cursor-glow__trail[data-mode="activity"] {
+  width: 96px;
+  height: 96px;
+  margin-top: -48px;
+  margin-left: -48px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.6), transparent 70%);
+  opacity: 0.85;
+}
+
+.cursor-glow__trail[data-mode="approval"] {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.45), transparent 70%);
+}
+
+.cursor-glow__trail[data-mode="error"] {
+  opacity: 0.35;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent 70%);
+}
+
+/* Note: animates opacity/filter only, never transform — the trail's
+   transform is owned by Motion's x/y spring (inline style) and a CSS
+   animation touching transform would clobber it every frame. */
+.cursor-glow__trail[data-pulsing="true"] {
+  animation: cursor-success-pulse 700ms var(--ease-standard);
+}
+
+@keyframes cursor-success-pulse {
+  0% { opacity: 0.9; filter: blur(4px) brightness(1); }
+  40% { opacity: 1; filter: blur(6px) brightness(1.8); }
+  100% { opacity: 0.7; filter: blur(4px) brightness(1); }
+}
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+  animation: cursor-breathe 3.2s ease-in-out infinite;
+}
+
+.cursor-glow__star {
+  display: block;
+  color: var(--purple-bright);
+  filter: drop-shadow(0 0 7px rgba(167, 139, 250, 0.6));
+  transform: rotate(24deg);
+  transition: color var(--duration-fast) var(--ease-standard), filter var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
+
+.cursor-glow[data-interactive="true"] .cursor-glow__star {
+  color: #fff;
+  filter: drop-shadow(0 0 11px rgba(167, 139, 250, 0.9));
+  transform: rotate(24deg) scale(1.05);
+}
+
+.cursor-glow[data-mode="activity"] .cursor-glow__star {
+  filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.85));
+}
+
+.cursor-glow[data-mode="approval"] .cursor-glow__star {
+  color: var(--amber);
+  filter: drop-shadow(0 0 9px rgba(245, 158, 11, 0.7));
+}
+
+.cursor-glow[data-mode="error"] .cursor-glow__star {
+  color: rgba(233, 216, 255, 0.55);
+  filter: none;
+}
+
+@keyframes cursor-breathe {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-glow {
+    animation: none;
+  }
+}

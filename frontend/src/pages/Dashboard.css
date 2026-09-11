@@ -1,0 +1,146 @@
+.dashboard {
+  max-width: 920px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.dashboard__header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashboard__active-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--purple-bright);
+}
+
+.dashboard__eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+}
+
+.dashboard__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .dashboard__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard__card {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard__card-label {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.dashboard__card--active-run {
+  gap: 12px;
+}
+
+.dashboard__active-run {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard__active-run-info {
+  min-width: 0;
+}
+
+.dashboard__active-run-title {
+  margin: 0 0 2px;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard__active-run-status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--purple-bright);
+}
+
+.dashboard__card-value {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-primary);
+}
+
+.dashboard__card-sub {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.dashboard__card-link {
+  font-size: 13px;
+  color: var(--purple-bright);
+  text-decoration: none;
+}
+
+.dashboard__section-title {
+  margin: 0 0 12px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.dashboard__upcoming {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard__upcoming-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.dashboard__upcoming-item:hover {
+  background: var(--surface-hover);
+}
+
+.dashboard__upcoming-time {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.dashboard__activity {
+  padding: 8px 18px;
+}

@@ -1,0 +1,28 @@
+.agent-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agent-result__p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.agent-result__list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.agent-result strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}

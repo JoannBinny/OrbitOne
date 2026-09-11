@@ -1,0 +1,25 @@
+.click-spark-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+}
+
+.click-spark {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -9px;
+  background:
+    radial-gradient(circle, var(--purple-bright) 0%, transparent 70%),
+    linear-gradient(0deg, transparent 45%, var(--purple-bright) 50%, transparent 55%),
+    linear-gradient(90deg, transparent 45%, var(--purple-bright) 50%, transparent 55%);
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-spark-layer {
+    display: none;
+  }
+}

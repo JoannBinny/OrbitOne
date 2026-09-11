@@ -1,0 +1,38 @@
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 22px;
+  border-radius: var(--radius-md);
+  background: rgba(248, 113, 113, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+}
+
+.error-state__headline {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.error-state__detail {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.error-state__retry {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.error-state__retry:hover {
+  background: var(--surface-hover);
+}

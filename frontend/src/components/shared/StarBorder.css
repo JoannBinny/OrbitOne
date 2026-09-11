@@ -1,0 +1,40 @@
+/**
+ * Animated conic-gradient rotating border (reactbits "StarBorder" concept,
+ * re-themed to purple/amber). Pure CSS — a pseudo-element behind the content
+ * rotates a conic gradient; the element's own background covers the center,
+ * leaving only a moving glow at the edge. Apply the `star-border` class to
+ * any element with its own background + border-radius set.
+ */
+.star-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.star-border::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  z-index: -1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--purple-bright) 8%,
+    transparent 22%,
+    transparent 75%,
+    var(--purple-bright) 92%,
+    transparent 100%
+  );
+  animation: star-border-spin 3.2s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes star-border-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-border::before {
+    animation: none;
+  }
+}

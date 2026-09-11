@@ -105,3 +105,16 @@ class AgentAction(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     event = relationship("Event", back_populates="actions")
+
+
+class AgentRun(Base):
+    __tablename__ = "agent_runs"
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(String, default="queued")  # queued, running, completed, failed
+    result_text = Column(Text, nullable=True)
+    event_id = Column(Integer, ForeignKey("events.id"), nullable=True)
+    error = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)

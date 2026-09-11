@@ -1,0 +1,155 @@
+.event-detail {
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.event-detail__loading {
+  color: var(--text-tertiary);
+}
+
+.event-detail__header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.event-detail__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-primary);
+}
+
+.event-detail__orbit-link {
+  font-size: 13px;
+  color: var(--purple-bright);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.event-detail__orbit-link:hover {
+  text-decoration: underline;
+}
+
+.event-detail__meta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+.event-detail__grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .event-detail__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.event-detail__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.event-detail__section {
+  padding: 20px 22px;
+}
+
+.event-detail__section-label {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.event-detail__location-name {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.event-detail__equipment {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-detail__equipment li {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.event-detail__empty-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.event-detail__tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-detail__tasks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.event-detail__tasks li[data-done="true"] {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.event-detail__task-mark {
+  color: var(--purple-bright);
+}
+
+.event-detail__budget {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.event-detail__budget strong {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.event-detail__budget-threshold {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.event-detail__approvals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-detail__activity-panel {
+  padding: 6px 18px;
+  max-height: 480px;
+  overflow-y: auto;
+}

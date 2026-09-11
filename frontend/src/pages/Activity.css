@@ -1,0 +1,24 @@
+.activity-page {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.activity-page__eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+}
+
+.activity-page__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-primary);
+}
+
+.activity-page__panel {
+  padding: 8px 22px;
+}

@@ -1,0 +1,22 @@
+.run-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.run-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.run-checklist__mark {
+  color: var(--green);
+  filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.5));
+  flex-shrink: 0;
+}

@@ -1,0 +1,118 @@
+.execution-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.execution-summary__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--text-primary);
+}
+
+.execution-summary__items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.execution-summary__item {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.execution-summary__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.execution-summary__check {
+  margin-top: 3px;
+  flex-shrink: 0;
+  color: var(--green);
+  filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.5));
+}
+
+.execution-summary__item-label {
+  margin: 0 0 2px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.execution-summary__item-value {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.execution-summary__item-meta {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.execution-summary__task-list {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.execution-summary__budget {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.execution-summary__budget strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+.execution-summary__budget span {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.execution-summary__budget-note {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.execution-summary__approval {
+  margin-top: -4px;
+}
+
+.execution-summary__disclosure {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.execution-summary__disclosure summary {
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  user-select: none;
+}
+
+.execution-summary__disclosure summary:hover {
+  color: var(--text-secondary);
+}
+
+.execution-summary__disclosure[open] summary {
+  margin-bottom: 12px;
+}

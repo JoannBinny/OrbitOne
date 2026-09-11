@@ -1,0 +1,46 @@
+.glass-panel {
+  position: relative;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  transition: background var(--duration-standard) var(--ease-standard), border-color var(--duration-standard) var(--ease-standard);
+  --glare-x: 50%;
+  --glare-y: 50%;
+  overflow: hidden;
+}
+
+/* Glare/reflection on hover is reserved for crystal (Level 3) glass only —
+   approvals, active-run surfaces, the New Event command panel, major event
+   info. Standard (Level 2) glass — nav, lists, secondary panels — stays
+   quiet; only its background shifts on hover (below). Wrapping every panel
+   in a moving reflection was explicitly flagged as overdone. */
+.glass-panel--crystal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255, 255, 255, 0.14), transparent 45%);
+  opacity: 0;
+  transition: opacity var(--duration-standard) var(--ease-standard);
+}
+
+.glass-panel--crystal:hover::after {
+  opacity: 1;
+}
+
+.glass-panel--standard {
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur-standard));
+  -webkit-backdrop-filter: blur(var(--blur-standard));
+}
+
+.glass-panel--standard:hover {
+  background: var(--surface-hover);
+}
+
+.glass-panel--crystal {
+  background: var(--surface-crystal);
+  backdrop-filter: blur(var(--blur-crystal));
+  -webkit-backdrop-filter: blur(var(--blur-crystal));
+  border-color: var(--border-crystal);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 20px 60px rgba(0, 0, 0, 0.35);
+}

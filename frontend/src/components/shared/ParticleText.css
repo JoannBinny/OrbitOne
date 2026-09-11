@@ -1,0 +1,14 @@
+.particle-text {
+  position: relative;
+  display: inline-block;
+}
+
+.particle-text__real[data-hidden="true"] {
+  opacity: 0;
+}
+
+.particle-text__canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

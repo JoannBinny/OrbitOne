@@ -1,0 +1,41 @@
+.history-nav {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur-standard));
+  -webkit-backdrop-filter: blur(var(--blur-standard));
+  border: 1px solid var(--border-subtle);
+}
+
+.history-nav__button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.history-nav__button:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 860px) {
+  .history-nav {
+    top: 12px;
+    right: 12px;
+  }
+}

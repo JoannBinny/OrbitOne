@@ -1,0 +1,72 @@
+.tasks-page {
+  max-width: 920px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.tasks-page__eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+}
+
+.tasks-page__headline {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-primary);
+}
+
+.tasks-page__note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  max-width: 60ch;
+}
+
+.tasks-page__board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .tasks-page__board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tasks-page__column-label {
+  margin: 0 0 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+.tasks-page__column-label span {
+  color: var(--text-secondary);
+}
+
+.tasks-page__column-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tasks-page__card {
+  padding: 14px 16px;
+}
+
+.tasks-page__card-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.tasks-page__card-event {
+  font-size: 12px;
+  color: var(--purple-bright);
+  text-decoration: none;
+}
