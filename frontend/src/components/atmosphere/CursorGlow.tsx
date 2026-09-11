@@ -15,17 +15,29 @@ function modeForAmbientState(state: string): CursorMode {
 }
 
 /**
- * Custom four-point-star cursor with a spring-lagged trailing glow
- * (reactbits "GlowCursor" concept, re-themed to the OrbitOne star/purple
- * identity rather than copied verbatim). The star tip tracks the pointer
- * exactly for precision; only the soft glow behind it lags. Disabled on
- * coarse/touch pointers so it never interferes with real pointer semantics.
+ * Custom four-point-star cursor. The star IS the cursor identity and stays
+ * pixel-exact on the pointer. A soft "Smooth Cursor"-style trail follows
+ * behind it: a fixed chain of springs, each one tracking the previous
+ * segment's position with progressively softer physics, so the trail tapers
+ * smoothly instead of one single lagging blob. This is a from-scratch,
+ * hand-built reinterpretation of the concept — the real React Bits Pro
+ * "Smooth Cursor" component ships only via a paid pro.reactbits.dev
+ * registry (confirmed unavailable this session: `npx shadcn add
+ * @reactbits-starter/smooth-cursor-tw` fails with "Unknown registry", and
+ * the real registry requires a purchased REACTBITS_LICENSE_KEY — see
+ * orbitone-frontend-build). Kept restrained per the brief: purple/lavender,
+ * low opacity, blurred, screen-blended, never a thick neon comet.
+ *
+ * Disabled entirely on coarse/touch pointers so it never interferes with
+ * real pointer semantics.
  *
  * Semantic modes reflect the REAL global ambient state (never invented):
  * default (idle/nav) · activity (agent thinking/working — purple halo,
  * stronger glow) · approval (waiting_for_approval — warm amber) · success
  * (a brief pulse the moment a run completes) · error (subdued, dimmer, no
- * aggressive red).
+ * aggressive red). Smooth Cursor itself has no notion of these states, so —
+ * per the brief — the semantic color stays on the star/halo layer; the
+ * trail only inherits a restrained tint per mode.
  */
 export function CursorGlow() {
   const starRef = useRef<HTMLDivElement>(null);
@@ -34,10 +46,26 @@ export function CursorGlow() {
   const [pulsing, setPulsing] = useState(false);
   const ambientState = useAmbientStore((s) => s.state);
   const mode = modeForAmbientState(ambientState);
+
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const glowX = useSpring(mx, { damping: 24, stiffness: 160, mass: 0.7 });
-  const glowY = useSpring(my, { damping: 24, stiffness: 160, mass: 0.7 });
+
+  // Fixed 3-segment chain, softening as it goes — each useSpring call is
+  // unconditional and always present, so this respects the rules of hooks
+  // while still producing a real tapering trail (segment 3 lags behind
+  // segment 2, which lags behind segment 1, which lags behind the pointer).
+  const s1x = useSpring(mx, { stiffness: 240, damping: 26, mass: 0.5 });
+  const s1y = useSpring(my, { stiffness: 240, damping: 26, mass: 0.5 });
+  const s2x = useSpring(s1x, { stiffness: 140, damping: 24, mass: 0.6 });
+  const s2y = useSpring(s1y, { stiffness: 140, damping: 24, mass: 0.6 });
+  const s3x = useSpring(s2x, { stiffness: 80, damping: 22, mass: 0.7 });
+  const s3y = useSpring(s2y, { stiffness: 80, damping: 22, mass: 0.7 });
+
+  const segments = [
+    { x: s1x, y: s1y },
+    { x: s2x, y: s2y },
+    { x: s3x, y: s3y },
+  ];
 
   useEffect(() => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
@@ -73,14 +101,16 @@ export function CursorGlow() {
 
   return (
     <>
-      <motion.div
-        className="cursor-glow__trail"
-        style={{ x: glowX, y: glowY }}
-        data-interactive={interactive}
-        data-mode={mode}
-        data-pulsing={pulsing}
-        aria-hidden="true"
-      />
+      <div className="cursor-glow__trail-group" data-mode={mode} data-pulsing={pulsing} aria-hidden="true">
+        {segments.map((seg, i) => (
+          <motion.div
+            key={i}
+            className="cursor-glow__trail-segment"
+            data-index={i}
+            style={{ x: seg.x, y: seg.y }}
+          />
+        ))}
+      </div>
       <div ref={starRef} className="cursor-glow" data-interactive={interactive} data-mode={mode} aria-hidden="true">
         <StarIcon
           size={iconSize}

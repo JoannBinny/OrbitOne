@@ -16,6 +16,35 @@
   gap: 16px;
 }
 
+.event-detail__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.event-detail__delete {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+
+.event-detail__delete:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.event-detail__delete[data-confirming="true"] {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(248, 113, 113, 0.1);
+}
+
 .event-detail__title {
   margin: 0 0 8px;
   font-family: var(--font-display);
@@ -123,6 +152,27 @@
 
 .event-detail__task-mark {
   color: var(--purple-bright);
+}
+
+.event-detail__task-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.event-detail__task-toggle:disabled {
+  cursor: default;
+}
+
+.event-detail__tasks li[data-done="true"] .event-detail__task-mark {
+  color: var(--green);
 }
 
 .event-detail__budget {

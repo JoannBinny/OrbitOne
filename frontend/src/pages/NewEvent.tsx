@@ -44,9 +44,11 @@ export default function NewEvent() {
       ? "thinking"
       : run.status === "running"
         ? "working"
-        : run.status === "completed"
-          ? "complete"
-          : "error";
+        : run.status === "paused_for_approval"
+          ? "waiting_for_approval"
+          : run.status === "completed"
+            ? "complete"
+            : "error";
 
   useEffect(() => {
     setAmbient(orbState);
@@ -54,7 +56,11 @@ export default function NewEvent() {
   }, [orbState, setAmbient]);
 
   useEffect(() => {
-    if (run?.status === "completed") {
+    if (
+      run?.status === "completed" ||
+      run?.status === "paused_for_approval" ||
+      run?.status === "rejected"
+    ) {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
@@ -122,6 +128,8 @@ export default function NewEvent() {
               <p className="new-event__status">
                 {run?.status === "queued" && "Understanding your request"}
                 {run?.status === "running" && "Working on it"}
+                {run?.status === "paused_for_approval" && "Waiting on your approval"}
+                {run?.status === "rejected" && "Not approved"}
                 {run?.status === "failed" && "I couldn't complete that."}
                 {!run && "Connecting…"}
               </p>
@@ -143,9 +151,10 @@ export default function NewEvent() {
                 <ErrorState error={new Error(run.error ?? "The agent run failed.")} onRetry={handleReset} />
               )}
 
-              {run?.status === "completed" && run.event_id && (
-                <ExecutionSummary eventId={run.event_id} resultText={run.result_text} />
-              )}
+              {(run?.status === "completed" ||
+                run?.status === "paused_for_approval" ||
+                run?.status === "rejected") &&
+                run.event_id && <ExecutionSummary eventId={run.event_id} resultText={run.result_text} />}
 
               {run?.status === "completed" && !run.event_id && (
                 <div className="new-event__fallback">
@@ -156,7 +165,7 @@ export default function NewEvent() {
                 </div>
               )}
 
-              {run?.status === "completed" && (
+              {(run?.status === "completed" || run?.status === "rejected") && (
                 <div className="new-event__result-actions">
                   {run.event_id && (
                     <Link to={`/events/${run.event_id}`} className="new-event__view-event">

@@ -1,8 +1,8 @@
 import { apiGet, apiPost, buildQuery } from "./client";
 import type { Approval, ApprovalStatus } from "../types/api";
 
-export function listApprovals(status?: ApprovalStatus): Promise<Approval[]> {
-  return apiGet<Approval[]>(`/approvals${buildQuery({ status })}`);
+export function listApprovals(status?: ApprovalStatus, organizationId?: number): Promise<Approval[]> {
+  return apiGet<Approval[]>(`/approvals${buildQuery({ status, organization_id: organizationId })}`);
 }
 
 export function approveApproval(approvalId: number): Promise<Approval> {

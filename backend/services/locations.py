@@ -5,6 +5,7 @@ import models
 
 def get_available_locations(
     db: Session,
+    organization_id: int,
     start_time: datetime,
     end_time: datetime,
     min_capacity: int = 0,
@@ -12,6 +13,8 @@ def get_available_locations(
     needs_projector: bool = False,
 ):
     query = db.query(models.Location).filter(models.Location.capacity >= min_capacity)
+    if organization_id is not None:
+        query = query.filter(models.Location.organization_id == organization_id)
 
     if needs_computers:
         query = query.filter(models.Location.has_computers == True)  # noqa: E712

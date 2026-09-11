@@ -1,0 +1,113 @@
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1040px;
+}
+
+.calendar-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.calendar-page__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-page__eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 4px;
+}
+
+.calendar-page__headline {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.calendar-page__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.calendar-page__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-page__nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-page__nav-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.calendar-page__today {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.calendar-page__today:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.calendar-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-page__new {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 8px 4px;
+}
+
+.calendar-page__new:hover {
+  color: var(--purple-bright);
+}
+
+@media (max-width: 480px) {
+  .calendar-page__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-page__nav {
+    justify-content: space-between;
+  }
+
+  .calendar-page__actions {
+    justify-content: space-between;
+  }
+}

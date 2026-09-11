@@ -5,6 +5,7 @@ from typing import Optional
 
 class LocationOut(BaseModel):
     id: int
+    organization_id: int
     name: str
     capacity: int
     has_computers: bool
@@ -23,6 +24,7 @@ class EventCreate(BaseModel):
     start_time: datetime
     end_time: datetime
     location_id: Optional[int] = None
+    agent_run_id: Optional[int] = None
 
 
 class EventOut(BaseModel):
@@ -44,6 +46,10 @@ class TaskCreate(BaseModel):
     title: str
 
 
+class TaskUpdate(BaseModel):
+    status: str
+
+
 class TaskOut(BaseModel):
     id: int
     event_id: int
@@ -61,6 +67,7 @@ class ApprovalOut(BaseModel):
     amount: Optional[float]
     status: str
     created_at: datetime
+    agent_run_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -70,6 +77,7 @@ class ApprovalCreate(BaseModel):
     event_id: int
     reason: str
     amount: Optional[float] = None
+    agent_run_id: Optional[int] = None
 
 
 class BudgetItemCreate(BaseModel):

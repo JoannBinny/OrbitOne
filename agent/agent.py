@@ -9,17 +9,7 @@ from strands import Agent
 logging.getLogger("strands.models.openai").setLevel(logging.ERROR)
 
 from prompts import SYSTEM_PROMPT
-from tools import (
-    find_available_locations,
-    create_event,
-    create_task,
-    get_pending_tasks,
-    add_budget_item,
-    get_budget_status,
-    request_approval,
-    get_pending_approvals,
-    record_agent_action,
-)
+import tools
 
 load_dotenv()
 
@@ -91,28 +81,19 @@ def build_model():
     )
 
 
-def build_agent() -> Agent:
+def build_agent(organization_id: int, run_id: int = None) -> Agent:
     model = build_model()
 
     return Agent(
         model=model,
         system_prompt=SYSTEM_PROMPT,
-        tools=[
-            find_available_locations,
-            create_event,
-            create_task,
-            get_pending_tasks,
-            add_budget_item,
-            get_budget_status,
-            request_approval,
-            get_pending_approvals,
-            record_agent_action,
-        ],
+        tools=tools.build_tools(organization_id, run_id),
     )
 
 
 if __name__ == "__main__":
-    agent = build_agent()
+    DEMO_ORGANIZATION_ID = 1  # standalone CLI has no run/org context otherwise
+    agent = build_agent(DEMO_ORGANIZATION_ID)
     print("OrbitOne agent ready. Type a request (or 'quit').\n")
     while True:
         user_input = input("You: ")

@@ -6,6 +6,7 @@ import { useLocations } from "../hooks/useLocations";
 import { useTasks } from "../hooks/useTasks";
 import { useApprovals } from "../hooks/useApprovals";
 import { useActivity } from "../hooks/useActivity";
+import { useOrganization } from "../hooks/useOrganization";
 import { OrbCore } from "../components/core/OrbCore";
 import { GlassPanel } from "../components/shared/GlassPanel";
 import { ActivityTimeline } from "../components/activity/ActivityTimeline";
@@ -25,12 +26,13 @@ export default function EventOrbit() {
   const params = useParams<{ id: string }>();
   const eventId = Number(params.id);
   const [selected, setSelected] = useState<NodeKey | null>(null);
+  const { organization } = useOrganization();
 
   const event = useEvent(eventId);
-  const locations = useLocations();
+  const locations = useLocations(organization?.id);
   const tasks = useTasks(eventId);
   const budget = useBudgetTotal(eventId);
-  const approvals = useApprovals();
+  const approvals = useApprovals(undefined, organization?.id);
   const activity = useActivity(eventId);
 
   const location = locations.data?.find((loc) => loc.id === event.data?.location_id);

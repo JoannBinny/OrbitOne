@@ -110,12 +110,14 @@ with computers and a projector.
 
 OrbitOne can detect:
 
-- Existing room bookings
+- Existing room bookings (overlapping `Booking` rows)
 - Insufficient room capacity
 - Missing equipment
 - Scheduling conflicts
-- Insufficient booking notice
-- Other organization-specific policy violations
+
+**Not implemented in this MVP:** booking-notice-period checks and any other
+organization-specific policy beyond the budget threshold — no such policies exist in
+the data model yet.
 
 When a conflict occurs, OrbitOne searches for verified alternatives instead of simply reporting the problem.
 
@@ -134,13 +136,17 @@ The agent can create internal preparation tasks such as:
 - Collect attendance
 - Submit expense report
 
-Tasks can contain owners, due dates, priorities, and statuses.
+Tasks currently have only a `title` and a `status` (`pending`/`done`). Owners, due
+dates, and priorities are **planned, not implemented**.
 
 ---
 
 ### Budget Estimation
 
-OrbitOne can estimate event expenses and compare them against organizational budget policies.
+OrbitOne can estimate event expenses and compare them against organizational budget
+policies — via the LLM's own reasoning plus the real `add_budget_item` and
+`get_budget_status` tools, not a dedicated `estimate_budget` tool (see Agent Tools
+below for what actually exists).
 
 For example:
 
@@ -168,71 +174,67 @@ Actions involving significant consequences require human approval.
 
 - Extract event details
 - Check availability
-- Retrieve policies
-- Create internal draft tasks
-- Calculate estimates
-- Draft communications
-- Detect overdue tasks
+- Retrieve budget/policy thresholds
+- Create tasks
+- Add budget line items
+- Hold a room for the requested time slot (creates a real `Booking` so a second
+  request can't double-book it — see "Reservation Semantics" note below)
 - Suggest alternatives
-- Update internal statuses
+- Update event status (`draft` → `needs_approval`/`confirmed`/`cancelled`)
 
 #### Approval required
 
-- Sending external messages
-- Finalizing room reservations
-- Cancelling or modifying bookings
-- Spending or approving money
-- Sharing sensitive information
-- Making irreversible changes
-- Committing the organization to an external arrangement
+- Spending/committing budget above the organization's threshold
+- Confirming an event whose budget requires approval (the event stays
+  `needs_approval` — not `confirmed` — until a human decides)
+
+**Not implemented in this MVP** (listed here so the gap is explicit, not silently
+dropped): sending external messages, drafting communications, sharing sensitive
+information, and any approval gate on the room hold itself. The room hold (`Booking`
+row) is created immediately when the event is created, specifically so that a second
+concurrent request can't book the same slot — approval governs the *spend*, not the
+reservation. If the approval is rejected, that booking is deleted, releasing the room.
 
 This keeps the system useful without removing human control.
 
 ---
 
-### Draft Communication
+### Draft Communication (planned, not implemented)
 
-OrbitOne can generate:
-
-- Event announcements
-- Faculty approval requests
-- Reminders
-- Internal notifications
-
-In the MVP, these are prepared as drafts rather than being automatically sent to real recipients.
+Generating event announcements, reminders, or internal notifications is not built in
+this MVP — there is no `draft_notification` tool or equivalent. Approval requests
+themselves are real (`request_approval`), but they are structured `Approval` records,
+not drafted messages.
 
 ---
 
 ### Background Task Monitoring
 
-OrbitOne can identify:
-
-- Pending tasks
-- Overdue tasks
-- Approaching deadlines
-- Incomplete event preparation
-
-It can prepare reminders and surface work that requires attention.
+OrbitOne can identify pending tasks (via `get_pending_tasks`), globally or for one
+event. **Not implemented in this MVP:** tasks have no due date, so there is no
+"overdue" or "approaching deadline" concept, and no reminder-drafting capability
+exists yet.
 
 ---
 
 ### Audit Trail
 
-Every important agent action can be recorded in an activity log.
+Every important agent action can be recorded in an activity log (the `AgentAction` /
+`GET|POST /activity` model).
 
-The audit trail captures information such as:
+The audit trail actually stores, per row:
 
-- User request
-- Agent action
-- Tool used
-- Tool input
-- Tool result
-- Timestamp
-- Action status
-- Approval status
-- Failures
+- `action` — a short label (e.g. `event_created`, `approval_approved`)
+- `details` — a free-text description (may summarize an input/outcome, but is not a
+  separate structured field for tool input/output)
+- `event_id` — which event the action relates to, if any
+- `timestamp`
 
-This makes the agent's behavior traceable and transparent.
+It does **not** currently store, as separate fields: the original user request, which
+tool was called, structured tool input/output, a distinct "action status," or a
+distinct "approval status" beyond what's implied by the `action` label itself
+(`approval_requested` / `approval_approved` / `approval_rejected`). Anything beyond
+those four fields is planned, not implemented, in this MVP.
 
 ---
 
@@ -318,58 +320,66 @@ OrbitOne uses the **Strands Agents SDK** as the core agent framework rather than
 
 ## Agent Tools
 
-OrbitOne is designed around domain-specific tools that allow the AI agent to interact with the organization's data.
+OrbitOne is designed around domain-specific tools that allow the AI agent to interact
+with the organization's data. These are the 9 tools that actually exist, built by
+`agent/tools.py::build_tools(organization_id, run_id)` — `organization_id` and
+`run_id` are injected directly into each tool as a closure rather than being arguments
+the model has to supply, so the agent can never accidentally query or write another
+organization's data by getting an id wrong.
 
 ### `find_available_locations`
 
-Finds verified locations that satisfy:
+Finds verified locations (scoped to the caller's organization) that satisfy capacity,
+equipment (computers/projector), and time-window availability, excluding anything with
+a conflicting booking.
 
-- Capacity requirements
-- Equipment requirements
-- Date and time
-- Event requirements
-- Booking availability
+### `create_event`
+
+Creates a real event and, if a `location_id` is given, books that room for it
+(organization id and the originating agent run id are attached automatically).
 
 ### `create_task`
 
-Creates internal tasks with:
-
-- Task owner
-- Due date
-- Priority
-- Status
-
-### `estimate_budget`
-
-Calculates estimated costs and checks them against organization budget policies.
-
-### `draft_notification`
-
-Creates drafts for:
-
-- Announcements
-- Reminders
-- Approval requests
-
-### `request_approval`
-
-Creates a pending approval request when human authorization is required.
+Creates a task with a `title`, attached to an event. The `Task` model currently only
+has `title` and `status` (`pending`/`done`) — owner, due date, and priority are
+**planned, not implemented**.
 
 ### `get_pending_tasks`
 
-Retrieves incomplete or overdue tasks.
+Retrieves tasks with `status == "pending"`, optionally filtered to one event. There is
+no separate "overdue" concept — no task has a due date to be overdue against yet.
 
-### `get_organization_policy`
+### `add_budget_item`
 
-Retrieves organization-specific policies such as:
+Adds a real budget line item (label + amount) to an event.
 
-- Budget thresholds
-- Approval requirements
-- Booking notice periods
+### `get_budget_status`
+
+Returns the real running budget total for an event, the organization's policy
+threshold, and whether it's exceeded.
+
+### `request_approval`
+
+Creates a real pending `Approval` record tied to the event and to the agent run that
+requested it, so approving/rejecting it later can resume or terminate that same run.
+
+### `get_pending_approvals`
+
+Retrieves approvals still awaiting a human decision, scoped to the caller's
+organization.
 
 ### `record_agent_action`
 
-Records agent activity for transparency and auditing.
+Logs a reasoning step to the audit trail (see Audit Trail above for exactly what's
+stored).
+
+### Planned, not implemented in this MVP
+
+`estimate_budget` (budgets are estimated by the LLM's own reasoning plus
+`add_budget_item`/`get_budget_status`, not a dedicated calculation tool),
+`draft_notification` (no announcement/reminder drafting tool exists),
+`get_organization_policy` (there is no direct policy-lookup tool; the budget threshold
+is only reachable indirectly through `get_budget_status`).
 
 ---
 
@@ -496,18 +506,43 @@ These scenarios demonstrate that OrbitOne is an operational agent rather than a 
 
 ---
 
+### Approval Continuation (real, not simulated)
+
+When `request_approval` is called during a run, that `AgentRun` is marked
+`paused_for_approval` (not `completed`) and the `Approval` record stores the
+`agent_run_id` that requested it. The event's own status becomes `needs_approval`.
+
+- **Approve** (`POST /approvals/{id}/approve`): the event's status becomes `confirmed`,
+  and if the linked run is still `paused_for_approval`, a **second, real Strands agent
+  turn** is started on a background thread against that same `AgentRun` row. It's told
+  exactly what was approved and for which event, and continues the same workflow (e.g.
+  creating remaining tasks) before the run is finally marked `completed`.
+- **Reject** (`POST /approvals/{id}/reject`): the event's status becomes `cancelled`,
+  its room booking is deleted (releasing the slot for other requests), and the run is
+  marked `rejected` — no further agent turn runs.
+
+**Known limitation:** there is no persisted in-memory conversation/session carried
+across the pause. The resuming turn is a fresh `Agent` instance, not a literal resume
+of the first turn's internal state — Strands doesn't expose a serializable session
+store for this, and building one was out of scope for this MVP. What *is* real: the
+same `AgentRun` database row, the same event, and a genuine second LLM call with real
+tool execution — not a frontend-simulated "continuation."
+
+---
+
 ## Data and Organization Model
 
 OrbitOne is designed to work with organization-specific data.
 
-For the MVP, the project uses a fictional organization:
+For the MVP, the seeded organization is (see `backend/seed.py`, real integer `id`,
+not a string slug):
 
 ```text
-Organization: Orbit University
-Organization ID: orbit-university-001
+Organization: Christ University CS Dept
+Organization ID: 1
 ```
 
-Example locations include:
+Example locations include (12 total, see `backend/seed.py`):
 
 ```text
 Innovation Hall
@@ -523,15 +558,28 @@ Capacity: 40
 Equipment: Projector, Whiteboard
 ```
 
-Example policies include:
+The only policy that actually exists is a per-organization budget threshold:
 
 ```text
-Events with more than 50 participants require faculty approval.
-
 Spending above ₹5,000 requires additional approval.
-
-Room requests require at least 3 days' notice.
 ```
+
+"Events with more than 50 participants require faculty approval" and "room requests
+require 3 days' notice" are **not implemented** — there is no participant-count policy
+and no booking-notice-period check anywhere in the backend or agent.
+
+### Organization Isolation
+
+`Location` (via its own `organization_id`), `Event` (`organization_id`), and
+`Task`/`Approval`/`AgentAction` (scoped indirectly through their parent `Event`) are
+all attachable to exactly one organization. `GET /locations`, `/locations/available`,
+`/events`, `/tasks`, `/approvals`, and `/activity` all accept an optional
+`organization_id` query parameter that filters to that organization (omitting it
+preserves the old unfiltered behavior for backward compatibility). The agent's tools
+never take `organization_id` as an LLM-supplied argument — it's injected directly by
+`agent/tools.py::build_tools(organization_id, run_id)` when the run starts, so a
+request against one organization cannot read or write another organization's rooms,
+events, tasks, or approvals.
 
 The important distinction is that this information is stored as organization data and accessed through tools. It is not hardcoded into the agent's reasoning.
 

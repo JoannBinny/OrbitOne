@@ -1,8 +1,8 @@
-import { apiGet, apiPost } from "./client";
+import { apiDelete, apiGet, apiPost, buildQuery } from "./client";
 import type { Event, EventCreate } from "../types/api";
 
-export function listEvents(): Promise<Event[]> {
-  return apiGet<Event[]>("/events");
+export function listEvents(organizationId?: number): Promise<Event[]> {
+  return apiGet<Event[]>(`/events${buildQuery({ organization_id: organizationId })}`);
 }
 
 export function getEvent(eventId: number): Promise<Event> {
@@ -11,6 +11,10 @@ export function getEvent(eventId: number): Promise<Event> {
 
 export function createEvent(payload: EventCreate): Promise<Event> {
   return apiPost<Event>("/events", payload);
+}
+
+export function deleteEvent(eventId: number): Promise<void> {
+  return apiDelete<void>(`/events/${eventId}`);
 }
 
 export interface BudgetTotalResponse {

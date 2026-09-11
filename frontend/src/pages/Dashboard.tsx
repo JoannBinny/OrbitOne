@@ -14,10 +14,10 @@ import "./Dashboard.css";
 
 export default function Dashboard() {
   const { organization } = useOrganization();
-  const events = useEvents();
-  const pendingApprovals = useApprovals("pending");
-  const tasks = useTasks();
-  const activity = useActivity();
+  const events = useEvents(organization?.id);
+  const pendingApprovals = useApprovals("pending", organization?.id);
+  const tasks = useTasks(undefined, organization?.id);
+  const activity = useActivity(undefined, false, true, organization?.id);
   const agentRuns = useAgentRuns(organization?.id);
 
   const pendingTasks = tasks.data?.filter((t) => t.status === "pending") ?? [];

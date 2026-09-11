@@ -84,22 +84,56 @@
   transition: box-shadow var(--duration-cinematic) var(--ease-standard), background var(--duration-cinematic) var(--ease-standard);
 }
 
+/* Deliberately dim now that SpecterOrb (canvas) carries the primary
+   "ghostly energy" visual — this stays only as a faint ambient wash behind
+   it so the specter blobs read as distinct energy, not a flat glow. */
 .orb-core__plasma {
   position: absolute;
   inset: -20%;
   background: radial-gradient(circle at 60% 60%, var(--orb-color-bright), transparent 55%);
-  opacity: 0.55;
+  opacity: 0.16;
   animation: orb-plasma 7s ease-in-out infinite;
   filter: blur(2px);
 }
 
-.orb-core__particle-sphere {
+.orb-core__specter {
   position: absolute;
   top: 8%;
   left: 8%;
   width: 84%;
   height: 84%;
   pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Portal — inner depth. Two thin "iris" rings, different apparent depths
+   via size/opacity/speed, sitting behind the Specter Orb's canvas so its
+   energy reads as existing inside/in front of them, not beside them. */
+.orb-core__portal {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+.orb-core__portal--outer {
+  inset: 6%;
+  border: 1px solid rgba(216, 180, 254, 0.28);
+  background: radial-gradient(circle, transparent 55%, rgba(99, 102, 241, 0.12) 100%);
+  animation: portal-spin 22s linear infinite;
+}
+
+.orb-core__portal--inner {
+  inset: 20%;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent 70%);
+  animation: portal-spin 15s linear infinite reverse;
+  opacity: 0.3;
+}
+
+@keyframes portal-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .orb-core__highlight {
@@ -190,6 +224,8 @@
 .orb-core[data-state="thinking"] .orb-core__plasma {
   animation-duration: 5s;
 }
+.orb-core[data-state="thinking"] .orb-core__portal--outer { animation-duration: 14s; opacity: 0.3; }
+.orb-core[data-state="thinking"] .orb-core__portal--inner { animation-duration: 9s; opacity: 0.4; }
 
 .orb-core[data-state="working"] {
   --orb-spin-duration: 8s;
@@ -206,13 +242,20 @@
   width: 4px;
   height: 4px;
 }
+.orb-core[data-state="working"] .orb-core__portal--outer { animation-duration: 8s; opacity: 0.4; }
+.orb-core[data-state="working"] .orb-core__portal--inner { animation-duration: 5s; opacity: 0.5; }
 
+/* Approval waits stay purple-dominant per design brief — only a subtle
+   amber accent enters (via SpecterOrb's approvalAccent glow and this
+   slightly warmed glass rim), never a full hue swap of the orb itself. */
 .orb-core[data-state="waiting_for_approval"] {
-  --orb-color: #b98a3d;
-  --orb-color-bright: var(--amber);
   --orb-spin-duration: 32s;
   --particle-opacity: 0.3;
   --particle-duration: 22s;
+}
+.orb-core[data-state="waiting_for_approval"] .orb-core__glass {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.32), inset 0 0 20px rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.22);
 }
 
 .orb-core[data-state="completing"] .orb-core__glass {
@@ -241,6 +284,8 @@
 }
 .orb-core[data-state="error"] .orb-core__plasma { animation-play-state: paused; opacity: 0.25; }
 .orb-core[data-state="error"] .orb-core__star { animation-play-state: paused; opacity: 0.7; }
+.orb-core[data-state="error"] .orb-core__portal { animation-play-state: paused; opacity: 0.1; }
+.orb-core[data-state="error"] .orb-core__specter { opacity: 0.5; filter: saturate(0.6); }
 
 @keyframes orb-contract {
   0% { transform: scale(1); }
@@ -254,6 +299,7 @@
   .orb-core__plasma,
   .orb-core__star,
   .orb-core__pulse,
+  .orb-core__portal,
   .orb-core__sparkle::before,
   .orb-core__sparkle::after {
     animation: none;

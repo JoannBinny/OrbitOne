@@ -1,0 +1,106 @@
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-grid__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 2px;
+}
+
+.calendar-grid__weekday {
+  padding: 6px 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  text-align: left;
+}
+
+.calendar-grid__weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-grid__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-grid__day {
+  min-height: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+
+.calendar-grid__day:hover {
+  background: var(--surface-hover);
+}
+
+.calendar-grid__day[data-in-month="false"] {
+  opacity: 0.4;
+}
+
+.calendar-grid__day[data-today="true"] {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 1px var(--purple) inset, 0 0 16px rgba(139, 92, 246, 0.18);
+}
+
+.calendar-grid__day-number {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+
+.calendar-grid__day-number:hover {
+  background: var(--surface-strong);
+  color: var(--text-primary);
+}
+
+.calendar-grid__day[data-today="true"] .calendar-grid__day-number {
+  color: var(--purple-bright);
+  font-weight: 600;
+}
+
+.calendar-grid__day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+
+.calendar-grid__overflow {
+  background: none;
+  border: none;
+  padding: 2px 7px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.calendar-grid__overflow:hover {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 760px) {
+  .calendar-grid {
+    display: none;
+  }
+}

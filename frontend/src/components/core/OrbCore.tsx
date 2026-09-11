@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { motion } from "motion/react";
 import { StarIcon } from "../shared/StarIcon";
-import { OrbParticleSphere } from "./OrbParticleSphere";
+import { SpecterOrb } from "./SpecterOrb";
 import type { AmbientState } from "../../stores/ambientState";
 import "./OrbCore.css";
 
@@ -55,7 +55,14 @@ export function OrbCore({ state, size = "medium", layoutId }: OrbCoreProps) {
 
       <div className="orb-core__glass">
         <div className="orb-core__plasma" />
-        <OrbParticleSphere state={state} amber={state === "waiting_for_approval"} />
+        {/* Portal — inner energy/depth: two soft rotating iris rings sitting
+            BEHIND the Specter Orb's energy so it reads as "energy existing
+            deep inside/behind the glass," not a second graphic stacked next
+            to it. Pure CSS (no second canvas) — kept deliberately the
+            lowest-priority layer to cut first under perf pressure. */}
+        <div className="orb-core__portal orb-core__portal--outer" aria-hidden="true" />
+        <div className="orb-core__portal orb-core__portal--inner" aria-hidden="true" />
+        <SpecterOrb state={state} approvalAccent={state === "waiting_for_approval"} />
         <div className="orb-core__highlight" aria-hidden="true" />
         <StarIcon size={20} className="orb-core__star" />
         {state === "complete" && <span className="orb-core__sparkle" aria-hidden="true" />}

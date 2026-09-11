@@ -3,6 +3,7 @@ import { useEvent, useBudgetTotal } from "../../hooks/useEvents";
 import { useLocations } from "../../hooks/useLocations";
 import { useTasks } from "../../hooks/useTasks";
 import { useApprovals } from "../../hooks/useApprovals";
+import { useOrganization } from "../../hooks/useOrganization";
 import { StarIcon } from "../shared/StarIcon";
 import { ApprovalCard } from "../approvals/ApprovalCard";
 import { AgentResultText } from "./AgentResultText";
@@ -24,11 +25,12 @@ interface ExecutionSummaryProps {
  * an operations result.
  */
 export function ExecutionSummary({ eventId, resultText }: ExecutionSummaryProps) {
+  const { organization } = useOrganization();
   const event = useEvent(eventId);
-  const locations = useLocations();
+  const locations = useLocations(organization?.id);
   const tasks = useTasks(eventId);
   const budget = useBudgetTotal(eventId);
-  const approvals = useApprovals();
+  const approvals = useApprovals(undefined, organization?.id);
 
   if (!event.data) return null;
 

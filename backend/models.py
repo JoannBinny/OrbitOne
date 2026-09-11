@@ -16,6 +16,7 @@ class Organization(Base):
 class Location(Base):
     __tablename__ = "locations"
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     name = Column(String, nullable=False)
     capacity = Column(Integer, nullable=False)
     has_computers = Column(Boolean, default=False)
@@ -55,7 +56,7 @@ class Event(Base):
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
     location_id = Column(Integer, ForeignKey("locations.id"), nullable=True)
-    status = Column(String, default="draft")  # draft, confirmed, needs_approval
+    status = Column(String, default="draft")  # draft, needs_approval, confirmed, cancelled
 
     organization = relationship("Organization", back_populates="events")
     tasks = relationship("Task", back_populates="event")
@@ -92,6 +93,7 @@ class Approval(Base):
     amount = Column(Float, nullable=True)
     status = Column(String, default="pending")  # pending, approved, rejected
     created_at = Column(DateTime, default=datetime.utcnow)
+    agent_run_id = Column(Integer, ForeignKey("agent_runs.id"), nullable=True)
 
     event = relationship("Event", back_populates="approvals")
 
@@ -112,7 +114,7 @@ class AgentRun(Base):
     id = Column(Integer, primary_key=True, index=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     message = Column(Text, nullable=False)
-    status = Column(String, default="queued")  # queued, running, completed, failed
+    status = Column(String, default="queued")  # queued, running, paused_for_approval, completed, failed, rejected
     result_text = Column(Text, nullable=True)
     event_id = Column(Integer, ForeignKey("events.id"), nullable=True)
     error = Column(Text, nullable=True)

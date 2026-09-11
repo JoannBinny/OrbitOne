@@ -57,12 +57,51 @@
 
 .tasks-page__card {
   padding: 14px 16px;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.tasks-page__card[data-busy="true"] {
+  opacity: 0.6;
+}
+
+.tasks-page__card-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tasks-page__card-toggle:disabled {
+  cursor: default;
+}
+
+.tasks-page__card-check {
+  flex-shrink: 0;
+  color: var(--purple-bright);
+  font-size: 14px;
+  line-height: 1.4;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.tasks-page__card[data-done="true"] .tasks-page__card-check {
+  color: var(--green);
 }
 
 .tasks-page__card-title {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 14px;
   color: var(--text-primary);
+}
+
+.tasks-page__card[data-done="true"] .tasks-page__card-title {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
 }
 
 .tasks-page__card-event {

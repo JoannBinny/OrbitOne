@@ -1,58 +1,53 @@
-.cursor-glow__trail {
+/* "Smooth Cursor" trail — a small chain of soft, tapering dots (see
+   CursorGlow.tsx for why this is hand-built rather than the licensed React
+   Bits Pro component). Deliberately subtle: low opacity, blurred, additive
+   screen blend, shrinking/dimming with distance from the pointer. */
+.cursor-glow__trail-group {
   position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.cursor-glow__trail-segment {
+  position: absolute;
   top: 0;
   left: 0;
-  z-index: 9998;
-  width: 64px;
-  height: 64px;
-  margin-top: -32px;
-  margin-left: -32px;
   border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.35), transparent 70%);
-  filter: blur(4px);
-  opacity: 0.7;
-  transition: width 220ms var(--ease-standard), height 220ms var(--ease-standard), margin 220ms var(--ease-standard);
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.32), transparent 72%);
+  filter: blur(3px);
+  transform-origin: center;
 }
 
-.cursor-glow__trail[data-interactive="true"] {
-  width: 88px;
-  height: 88px;
-  margin-top: -44px;
-  margin-left: -44px;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.5), transparent 70%);
+.cursor-glow__trail-segment[data-index="0"] { width: 22px; height: 22px; margin: -11px 0 0 -11px; opacity: 0.5; }
+.cursor-glow__trail-segment[data-index="1"] { width: 30px; height: 30px; margin: -15px 0 0 -15px; opacity: 0.32; }
+.cursor-glow__trail-segment[data-index="2"] { width: 36px; height: 36px; margin: -18px 0 0 -18px; opacity: 0.18; }
+
+/* Semantic modes — reflect real global ambient state, see CursorGlow.tsx.
+   The trail only carries a restrained tint per mode; the primary semantic
+   color lives on the star/halo below. */
+.cursor-glow__trail-group[data-mode="activity"] .cursor-glow__trail-segment {
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.42), transparent 72%);
 }
 
-/* Semantic modes — reflect real global ambient state, see CursorGlow.tsx */
-.cursor-glow__trail[data-mode="activity"] {
-  width: 96px;
-  height: 96px;
-  margin-top: -48px;
-  margin-left: -48px;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.6), transparent 70%);
-  opacity: 0.85;
+.cursor-glow__trail-group[data-mode="approval"] .cursor-glow__trail-segment {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 72%);
 }
 
-.cursor-glow__trail[data-mode="approval"] {
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.45), transparent 70%);
+.cursor-glow__trail-group[data-mode="error"] .cursor-glow__trail-segment {
+  opacity: 0.5;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.16), transparent 72%);
 }
 
-.cursor-glow__trail[data-mode="error"] {
-  opacity: 0.35;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent 70%);
-}
-
-/* Note: animates opacity/filter only, never transform — the trail's
-   transform is owned by Motion's x/y spring (inline style) and a CSS
-   animation touching transform would clobber it every frame. */
-.cursor-glow__trail[data-pulsing="true"] {
+.cursor-glow__trail-group[data-pulsing="true"] .cursor-glow__trail-segment {
   animation: cursor-success-pulse 700ms var(--ease-standard);
 }
 
 @keyframes cursor-success-pulse {
-  0% { opacity: 0.9; filter: blur(4px) brightness(1); }
-  40% { opacity: 1; filter: blur(6px) brightness(1.8); }
-  100% { opacity: 0.7; filter: blur(4px) brightness(1); }
+  0% { filter: blur(3px) brightness(1); }
+  40% { filter: blur(5px) brightness(1.8); }
+  100% { filter: blur(3px) brightness(1); }
 }
 
 .cursor-glow {

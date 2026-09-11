@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
 import { useApprovals } from "../hooks/useApprovals";
+import { useOrganization } from "../hooks/useOrganization";
 import { ApprovalCard } from "../components/approvals/ApprovalCard";
 import { OrbCore } from "../components/core/OrbCore";
 import { EmptyState } from "../components/shared/EmptyState";
@@ -9,7 +10,8 @@ import { useAmbientStore } from "../stores/ambientState";
 import "./Approvals.css";
 
 export default function Approvals() {
-  const approvals = useApprovals("pending");
+  const { organization } = useOrganization();
+  const approvals = useApprovals("pending", organization?.id);
   const setAmbient = useAmbientStore((s) => s.set);
   const hasPending = (approvals.data?.length ?? 0) > 0;
 

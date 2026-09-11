@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { StarIcon } from "../shared/StarIcon";
 import { useApprovals } from "../../hooks/useApprovals";
+import { useOrganization } from "../../hooks/useOrganization";
 import "./Sidebar.css";
 
 const NAV_ITEMS = [
@@ -10,13 +11,15 @@ const NAV_ITEMS = [
   { to: "/events", label: "Events", glyph: "◌" },
   { to: "/tasks", label: "Tasks", glyph: "✓" },
   { to: "/approvals", label: "Approvals", glyph: "◇" },
+  { to: "/calendar", label: "Calendar", glyph: "◷" },
   { to: "/activity", label: "Orbit", glyph: "✦" },
 ];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [logoSpinning, setLogoSpinning] = useState(false);
-  const { data: pending } = useApprovals("pending");
+  const { organization } = useOrganization();
+  const { data: pending } = useApprovals("pending", organization?.id);
   const pendingCount = pending?.length ?? 0;
 
   function handleLogoClick() {

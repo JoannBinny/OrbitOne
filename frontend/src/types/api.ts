@@ -16,7 +16,7 @@ export interface Location {
   has_microphone: boolean;
 }
 
-export type EventStatus = "draft" | "confirmed" | "needs_approval";
+export type EventStatus = "draft" | "needs_approval" | "confirmed" | "cancelled";
 
 export interface Event {
   id: number;
@@ -36,6 +36,7 @@ export interface EventCreate {
   start_time: string;
   end_time: string;
   location_id?: number | null;
+  agent_run_id?: number | null;
 }
 
 export type TaskStatus = "pending" | "done";
@@ -61,6 +62,7 @@ export interface Approval {
   amount: number | null;
   status: ApprovalStatus | string;
   created_at: string;
+  agent_run_id?: number | null;
 }
 
 export interface BudgetItem {
@@ -85,7 +87,7 @@ export interface AgentAction {
   timestamp: string;
 }
 
-export type AgentRunStatus = "queued" | "running" | "completed" | "failed";
+export type AgentRunStatus = "queued" | "running" | "paused_for_approval" | "completed" | "failed" | "rejected";
 
 export interface AgentRun {
   id: number;

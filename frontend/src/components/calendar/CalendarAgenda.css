@@ -1,0 +1,68 @@
+.calendar-agenda {
+  display: none;
+}
+
+.calendar-agenda__strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.calendar-agenda__strip-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 2px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.calendar-agenda__strip-day[data-today="true"] {
+  border-color: var(--purple);
+}
+
+.calendar-agenda__strip-day[data-selected="true"] {
+  background: var(--surface-strong);
+  color: var(--text-primary);
+  border-color: var(--purple-bright);
+}
+
+.calendar-agenda__strip-weekday {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.calendar-agenda__strip-number {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-agenda__strip-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--purple-bright);
+}
+
+.calendar-agenda__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendar-agenda__list .calendar-chip {
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+@media (max-width: 760px) {
+  .calendar-agenda {
+    display: block;
+  }
+}

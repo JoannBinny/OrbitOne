@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEvents } from "../hooks/useEvents";
+import { useOrganization } from "../hooks/useOrganization";
 import { GlassPanel } from "../components/shared/GlassPanel";
 import { EmptyState } from "../components/shared/EmptyState";
 import { ErrorState } from "../components/shared/ErrorState";
@@ -7,7 +8,8 @@ import { formatTimeRange } from "../lib/format";
 import "./Events.css";
 
 export default function Events() {
-  const events = useEvents();
+  const { organization } = useOrganization();
+  const events = useEvents(organization?.id);
 
   return (
     <div className="events-page">

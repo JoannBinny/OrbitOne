@@ -8,6 +8,7 @@ import EventOrbit from "./pages/EventOrbit";
 import Approvals from "./pages/Approvals";
 import TasksPage from "./pages/Tasks";
 import ActivityPage from "./pages/Activity";
+import CalendarPage from "./pages/Calendar";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="events/:id/orbit" element={<EventOrbit />} />
           <Route path="approvals" element={<Approvals />} />
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="activity" element={<ActivityPage />} />
         </Route>

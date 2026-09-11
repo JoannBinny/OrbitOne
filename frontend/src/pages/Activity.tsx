@@ -1,11 +1,13 @@
 import { useActivity } from "../hooks/useActivity";
+import { useOrganization } from "../hooks/useOrganization";
 import { GlassPanel } from "../components/shared/GlassPanel";
 import { ErrorState } from "../components/shared/ErrorState";
 import { ActivityTimeline } from "../components/activity/ActivityTimeline";
 import "./Activity.css";
 
 export default function ActivityPage() {
-  const activity = useActivity();
+  const { organization } = useOrganization();
+  const activity = useActivity(undefined, false, true, organization?.id);
 
   return (
     <div className="activity-page">

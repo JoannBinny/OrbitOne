@@ -13,10 +13,10 @@ import { listActivity } from "../api/activity";
  * activity system-wide, which would misrepresent unrelated history as
  * belonging to "right now" if fetched and rendered prematurely.
  */
-export function useActivity(eventId?: number, live = false, enabled = true) {
+export function useActivity(eventId?: number, live = false, enabled = true, organizationId?: number) {
   return useQuery({
-    queryKey: ["activity", eventId ?? "all"],
-    queryFn: () => listActivity(eventId),
+    queryKey: ["activity", eventId ?? "all", organizationId ?? "all"],
+    queryFn: () => listActivity(eventId, organizationId),
     refetchInterval: live ? 2000 : false,
     enabled,
   });

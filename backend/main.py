@@ -5,7 +5,6 @@ import threading
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
 
@@ -47,29 +46,36 @@ def list_organizations(db: Session = Depends(get_db)):
 # ---------- Locations ----------
 
 @app.get("/locations", response_model=List[schemas.LocationOut])
-def list_locations(db: Session = Depends(get_db)):
-    return db.query(models.Location).all()
+def list_locations(organization_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Location)
+    if organization_id is not None:
+        query = query.filter(models.Location.organization_id == organization_id)
+    return query.all()
 
 
 @app.get("/locations/available", response_model=List[schemas.LocationOut])
 def available_locations(
     start_time: datetime,
     end_time: datetime,
+    organization_id: Optional[int] = None,
     min_capacity: int = 0,
     needs_computers: bool = False,
     needs_projector: bool = False,
     db: Session = Depends(get_db),
 ):
     return location_service.get_available_locations(
-        db, start_time, end_time, min_capacity, needs_computers, needs_projector
+        db, organization_id, start_time, end_time, min_capacity, needs_computers, needs_projector
     )
 
 
 # ---------- Events ----------
 
 @app.get("/events", response_model=List[schemas.EventOut])
-def list_events(db: Session = Depends(get_db)):
-    return db.query(models.Event).all()
+def list_events(organization_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Event)
+    if organization_id is not None:
+        query = query.filter(models.Event.organization_id == organization_id)
+    return query.all()
 
 
 @app.get("/events/{event_id}", response_model=schemas.EventOut)
@@ -78,6 +84,29 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+
+@app.delete("/events/{event_id}", status_code=204)
+def delete_event(event_id: int, db: Session = Depends(get_db)):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    title = event.title
+    # Release the room hold and remove everything that only exists in
+    # relation to this event. AgentRun rows are preserved (a run is its own
+    # audit record) but detached from the deleted event.
+    db.query(models.Booking).filter(models.Booking.event_id == event_id).delete()
+    db.query(models.Task).filter(models.Task.event_id == event_id).delete()
+    db.query(models.BudgetItem).filter(models.BudgetItem.event_id == event_id).delete()
+    db.query(models.Approval).filter(models.Approval.event_id == event_id).delete()
+    db.query(models.AgentAction).filter(models.AgentAction.event_id == event_id).update({"event_id": None})
+    db.query(models.AgentRun).filter(models.AgentRun.event_id == event_id).update({"event_id": None})
+    db.delete(event)
+    db.commit()
+
+    audit_service.log_action(db, "event_deleted", f"Deleted event '{title}'", None)
+    return None
 
 
 @app.post("/events", response_model=schemas.EventOut)
@@ -124,6 +153,13 @@ def create_event(payload: schemas.EventCreate, db: Session = Depends(get_db)):
         db.add(booking)
         db.commit()
 
+    if payload.agent_run_id is not None:
+        run = db.query(models.AgentRun).filter(models.AgentRun.id == payload.agent_run_id).first()
+        if run:
+            run.event_id = event.id
+            run.updated_at = datetime.utcnow()
+            db.commit()
+
     audit_service.log_action(db, "event_created", f"Created event '{event.title}'", event.id)
     return event
 
@@ -131,10 +167,16 @@ def create_event(payload: schemas.EventCreate, db: Session = Depends(get_db)):
 # ---------- Tasks ----------
 
 @app.get("/tasks", response_model=List[schemas.TaskOut])
-def list_tasks(event_id: Optional[int] = None, db: Session = Depends(get_db)):
+def list_tasks(
+    event_id: Optional[int] = None,
+    organization_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
     query = db.query(models.Task)
     if event_id is not None:
         query = query.filter(models.Task.event_id == event_id)
+    if organization_id is not None:
+        query = query.join(models.Event).filter(models.Event.organization_id == organization_id)
     return query.all()
 
 
@@ -145,6 +187,21 @@ def create_task(payload: schemas.TaskCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(task)
     audit_service.log_action(db, "task_created", task.title, task.event_id)
+    return task
+
+
+@app.patch("/tasks/{task_id}", response_model=schemas.TaskOut)
+def update_task(task_id: int, payload: schemas.TaskUpdate, db: Session = Depends(get_db)):
+    if payload.status not in ("pending", "done"):
+        raise HTTPException(status_code=422, detail="status must be 'pending' or 'done'")
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task.status = payload.status
+    db.commit()
+    db.refresh(task)
+    action = "task_completed" if payload.status == "done" else "task_reopened"
+    audit_service.log_action(db, action, task.title, task.event_id)
     return task
 
 
@@ -178,23 +235,94 @@ def budget_total(event_id: int, db: Session = Depends(get_db)):
 # ---------- Approvals ----------
 
 @app.get("/approvals", response_model=List[schemas.ApprovalOut])
-def list_approvals(status: Optional[str] = None, db: Session = Depends(get_db)):
+def list_approvals(
+    status: Optional[str] = None,
+    organization_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
     query = db.query(models.Approval)
     if status:
         query = query.filter(models.Approval.status == status)
+    if organization_id is not None:
+        query = query.join(models.Event).filter(models.Event.organization_id == organization_id)
     return query.all()
 
 
 @app.post("/approvals", response_model=schemas.ApprovalOut)
 def create_approval(payload: schemas.ApprovalCreate, db: Session = Depends(get_db)):
     approval = models.Approval(
-        event_id=payload.event_id, reason=payload.reason, amount=payload.amount, status="pending"
+        event_id=payload.event_id,
+        reason=payload.reason,
+        amount=payload.amount,
+        status="pending",
+        agent_run_id=payload.agent_run_id,
     )
     db.add(approval)
+
+    event = db.query(models.Event).filter(models.Event.id == payload.event_id).first()
+    if event and event.status == "draft":
+        event.status = "needs_approval"
+
     db.commit()
     db.refresh(approval)
     audit_service.log_action(db, "approval_requested", payload.reason, payload.event_id)
     return approval
+
+
+def _resume_agent_job(run_id: int, approval_id: int):
+    """Resume the workflow a paused AgentRun belongs to after a human
+    approves it. This is a real second Strands agent turn against the same
+    AgentRun row — not a simulated continuation. There is no persisted
+    in-memory conversation/session to resume verbatim (Strands gives us no
+    serializable session store here, and building one is out of scope for
+    this MVP); instead the fresh turn is told exactly what was approved and
+    for which event, and continues that same real workflow to completion.
+    """
+    db = SessionLocal()
+    try:
+        run = db.query(models.AgentRun).filter(models.AgentRun.id == run_id).first()
+        approval = db.query(models.Approval).filter(models.Approval.id == approval_id).first()
+        if not run or not approval:
+            return
+        run.status = "running"
+        run.updated_at = datetime.utcnow()
+        db.commit()
+
+        event = db.query(models.Event).filter(models.Event.id == approval.event_id).first()
+
+        if AGENT_DIR not in sys.path:
+            sys.path.insert(0, AGENT_DIR)
+        import agent as agent_module
+
+        amount_note = f" for ₹{approval.amount:,.0f}" if approval.amount is not None else ""
+        resume_message = (
+            f"Your pending approval request \"{approval.reason}\"{amount_note} for event "
+            f"#{event.id} (\"{event.title}\") has just been APPROVED by a human. "
+            f"Continue that same workflow to completion: make sure the remaining tasks for "
+            f"event_id={event.id} are in place, then give a brief final confirmation. "
+            f"Do not create a new event."
+        )
+        strands_agent = agent_module.build_agent(run.organization_id, run_id=run.id)
+        response = strands_agent(resume_message)
+
+        db.refresh(run)
+        run.status = "completed"
+        run.result_text = (run.result_text or "") + "\n\n---\nAfter approval:\n" + str(response)
+        run.updated_at = datetime.utcnow()
+        db.commit()
+    except Exception as exc:
+        error_db = SessionLocal()
+        try:
+            run = error_db.query(models.AgentRun).filter(models.AgentRun.id == run_id).first()
+            if run:
+                run.status = "failed"
+                run.error = str(exc)
+                run.updated_at = datetime.utcnow()
+                error_db.commit()
+        finally:
+            error_db.close()
+    finally:
+        db.close()
 
 
 @app.post("/approvals/{approval_id}/approve", response_model=schemas.ApprovalOut)
@@ -203,9 +331,23 @@ def approve(approval_id: int, db: Session = Depends(get_db)):
     if not approval:
         raise HTTPException(status_code=404, detail="Approval not found")
     approval.status = "approved"
+
+    event = db.query(models.Event).filter(models.Event.id == approval.event_id).first()
+    if event:
+        event.status = "confirmed"
+
     db.commit()
     db.refresh(approval)
     audit_service.log_action(db, "approval_approved", approval.reason, approval.event_id)
+
+    if approval.agent_run_id is not None:
+        run = db.query(models.AgentRun).filter(models.AgentRun.id == approval.agent_run_id).first()
+        if run and run.status == "paused_for_approval":
+            thread = threading.Thread(
+                target=_resume_agent_job, args=(run.id, approval.id), daemon=True
+            )
+            thread.start()
+
     return approval
 
 
@@ -215,19 +357,43 @@ def reject(approval_id: int, db: Session = Depends(get_db)):
     if not approval:
         raise HTTPException(status_code=404, detail="Approval not found")
     approval.status = "rejected"
+
+    event = db.query(models.Event).filter(models.Event.id == approval.event_id).first()
+    if event:
+        event.status = "cancelled"
+        # Rejecting the spend means the room hold is no longer authorized —
+        # release it so it's genuinely available for other requests again.
+        db.query(models.Booking).filter(models.Booking.event_id == event.id).delete()
+
     db.commit()
     db.refresh(approval)
     audit_service.log_action(db, "approval_rejected", approval.reason, approval.event_id)
+
+    if approval.agent_run_id is not None:
+        run = db.query(models.AgentRun).filter(models.AgentRun.id == approval.agent_run_id).first()
+        if run:
+            run.status = "rejected"
+            run.updated_at = datetime.utcnow()
+            db.commit()
+
     return approval
 
 
 # ---------- Activity / audit log ----------
 
 @app.get("/activity", response_model=List[schemas.AgentActionOut])
-def list_activity(event_id: Optional[int] = None, db: Session = Depends(get_db)):
+def list_activity(
+    event_id: Optional[int] = None,
+    organization_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
     query = db.query(models.AgentAction).order_by(models.AgentAction.timestamp.desc())
     if event_id is not None:
         query = query.filter(models.AgentAction.event_id == event_id)
+    if organization_id is not None:
+        # Excludes AgentAction rows with no event_id (global entries) when this
+        # filter is applied — those have no organization to scope them to.
+        query = query.join(models.Event).filter(models.Event.organization_id == organization_id)
     return query.all()
 
 
@@ -258,39 +424,34 @@ def _run_agent_job(run_id: int, message: str, organization_id: int):
         run.updated_at = datetime.utcnow()
         db.commit()
 
-        before_max_event_id = db.query(func.max(models.Event.id)).scalar() or 0
-
         if AGENT_DIR not in sys.path:
             sys.path.insert(0, AGENT_DIR)
         import agent as agent_module  # agent/agent.py, importable once AGENT_DIR is on sys.path
 
-        strands_agent = agent_module.build_agent()
-        # The agent's create_event/find_available_locations tools require an
-        # organization_id argument, but nothing else tells the LLM what value
-        # to use — without this it sometimes (correctly, from its point of
-        # view) stops and asks the user for one instead of guessing. Give it
-        # explicitly rather than relying on the model to infer it.
-        contextual_message = f"(Organization ID: {organization_id})\n\n{message}"
-        response = strands_agent(contextual_message)
+        # organization_id and run_id are injected directly into the tools'
+        # closures (see agent/tools.py::build_tools) rather than relying on
+        # the LLM to correctly supply them as arguments, and the same run_id
+        # is what create_event/request_approval use to set
+        # AgentRun.event_id / Approval.agent_run_id deterministically — no
+        # "newest event" heuristic needed.
+        strands_agent = agent_module.build_agent(organization_id, run_id=run_id)
+        response = strands_agent(message)
 
-        # Best-effort correlation: the agent's tools create events via HTTP
-        # without tagging a run id, so we infer the event this run produced
-        # by looking for the newest event created (by primary key) for this
-        # organization since the run started. If the agent created more than
-        # one event in a single run, only the most recent is linked.
-        newest_event = (
-            db.query(models.Event)
-            .filter(
-                models.Event.id > before_max_event_id,
-                models.Event.organization_id == organization_id,
-            )
-            .order_by(models.Event.id.desc())
+        db.refresh(run)  # pick up event_id set synchronously by a tool call during this turn
+        pending_approval = (
+            db.query(models.Approval)
+            .filter(models.Approval.agent_run_id == run_id, models.Approval.status == "pending")
             .first()
         )
-
-        run.status = "completed"
+        if pending_approval:
+            run.status = "paused_for_approval"
+        else:
+            run.status = "completed"
+            if run.event_id:
+                event = db.query(models.Event).filter(models.Event.id == run.event_id).first()
+                if event and event.status == "draft":
+                    event.status = "confirmed"
         run.result_text = str(response)
-        run.event_id = newest_event.id if newest_event else None
         run.updated_at = datetime.utcnow()
         db.commit()
     except Exception as exc:

@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approveApproval, listApprovals, rejectApproval } from "../api/approvals";
 import type { ApprovalStatus } from "../types/api";
 
-export function useApprovals(status?: ApprovalStatus) {
+export function useApprovals(status?: ApprovalStatus, organizationId?: number) {
   return useQuery({
-    queryKey: ["approvals", status ?? "all"],
-    queryFn: () => listApprovals(status),
+    queryKey: ["approvals", status ?? "all", organizationId ?? "all"],
+    queryFn: () => listApprovals(status, organizationId),
   });
 }
 
