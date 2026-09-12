@@ -840,18 +840,7 @@ OrbitOne was developed for the **Agents for Humans** hackathon under the **Profe
 
 The project uses the **Strands Agents SDK** as its core agent framework and focuses on building an AI agent that performs meaningful operational work for real users.
 
----
 
-## Team
-
-**OrbitOne**
-
-Built by:
-
-- Joann Binny
-- Project Team
-
----
 
 ## License
 
@@ -859,14 +848,6 @@ This project is licensed under the **MIT License**.
 
 See the [LICENSE](LICENSE) file for details.
 
----
-
-## Repository
-
-**GitHub:**  
-https://github.com/JoannBinny/OrbitOne
-
----
 
 ## Project Tagline
 
