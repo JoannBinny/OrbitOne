@@ -11,7 +11,7 @@ logging.getLogger("strands.models.openai").setLevel(logging.ERROR)
 from prompts import SYSTEM_PROMPT
 import tools
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 
 def build_model():

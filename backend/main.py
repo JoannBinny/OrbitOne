@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
-from database import Base, engine, get_db, SessionLocal
+from database import Base, engine, get_db, SessionLocal, upgrade_schema
 import models
 import schemas
 from services import locations as location_service
@@ -17,6 +17,7 @@ from services import budget as budget_service
 from services import audit as audit_service
 
 Base.metadata.create_all(bind=engine)
+upgrade_schema()
 
 app = FastAPI(title="OrbitOne Backend")
 
