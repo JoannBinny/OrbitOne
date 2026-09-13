@@ -613,6 +613,24 @@ The repository separates the major responsibilities into:
 
 ---
 
+
+
+Create a `.env` file:
+
+```env
+MODEL_API_KEY=your_api_key_here
+```
+
+> Never commit `.env` or API keys to GitHub.
+
+Add the following to `.gitignore`:
+
+```gitignore
+.env
+.venv/
+__pycache__/
+*.pyc
+```
 ## Installation
 
 ### Prerequisites
@@ -622,8 +640,8 @@ Make sure the following are installed:
 - Python 3.10+
 - Git
 - pip
-- Node.js and npm, if using the frontend
-- A supported LLM provider / API key
+- Node.js and npm
+- An API key for at least one supported LLM provider (Groq, Gemini, Bedrock, or a local Ollama setup)
 
 ### Clone the repository
 
@@ -652,80 +670,76 @@ On Windows:
 
 ### Install Python dependencies
 
+The backend dynamically imports the agent at runtime, so both dependency sets live in one environment:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Configure environment variables
 
-Create a `.env` file:
-
-```env
-MODEL_API_KEY=your_api_key_here
-```
-
-> Never commit `.env` or API keys to GitHub.
-
-Add the following to `.gitignore`:
-
-```gitignore
-.env
-.venv/
-__pycache__/
-*.pyc
-```
-
----
-
-## Running the Backend
-
-Start the FastAPI server using the project's backend entry point.
-
-For example:
+The agent reads its config from `agent/.env`, not a root-level `.env`. Copy the example and fill it in:
 
 ```bash
-uvicorn backend.main:app --reload
+copy agent\.env.example agent\.env      # Windows
+cp agent/.env.example agent/.env        # macOS / Linux
 ```
 
-The API should then be available at:
+Set `MODEL_PROVIDER` to whichever provider you're using (`groq`, `gemini`, `bedrock`, or `ollama`) along with that provider's API key. Groq is the fastest to get working — free, no card required, no daily quota issues like Gemini's free tier.
 
-```text
-http://localhost:8000
-```
+> Never commit `.env` or API keys to GitHub. Confirm `agent/.env` is covered by `.gitignore` before pushing.
 
-FastAPI's interactive API documentation can be accessed at:
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-## Running the Agent
-
-After configuring the environment and backend, start the OrbitOne agent using the project's agent entry point.
+### Seed the database
 
 ```bash
-python agent/main.py
+cd backend
+python seed.py
+cd ..
 ```
 
-The exact command may vary depending on the final agent entry point.
+This creates `backend/orbitone.db` with one seeded organization, 12 locations, and a budget policy. Skipping this step leaves the database empty — the frontend's API calls will all return successfully but empty, and the UI will appear stuck since there's no organization to load.
 
----
-
-## Running the Frontend
-
-If the frontend is configured as a Node.js application:
+### Install frontend dependencies
 
 ```bash
 cd frontend
 npm install
-npm run dev
+cd ..
 ```
 
-The frontend can then communicate with the FastAPI backend through the configured API URL.
-
 ---
+
+## Running the App
+
+The easiest way is the included script, which starts both servers and opens the browser:
+
+```bash
+./start-dev.sh
+```
+
+On Windows, run this from Git Bash or WSL (double-clicking a `.sh` file just opens it in a text editor; it won't execute from Explorer or a plain PowerShell/cmd prompt).
+
+### Running manually (two terminals)
+
+**Terminal 1 — backend:**
+
+```bash
+cd backend
+uvicorn main:app --reload --port 8000
+```
+
+The API is then available at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs`.
+
+**Terminal 2 — frontend:**
+
+```bash
+cd frontend
+npm run dev -- --port 5173
+```
+
+Then open `http://localhost:5173`.
+
+Note: `uvicorn` must be run from inside `backend/` (not `uvicorn backend.main:app` from the root) — the agent's dynamic import and `.env` loading assume that working directory.
 
 ## Security
 
