@@ -684,6 +684,7 @@ Start the FastAPI server using the project's backend entry point.
 For example:
 
 ```bash
+cd backend
 uvicorn backend.main:app --reload
 ```
 
